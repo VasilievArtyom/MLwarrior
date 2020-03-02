@@ -2,6 +2,7 @@ import math
 import numpy as np
 from numpy import *
 from scipy.optimize import curve_fit
+from scipy import signal
 from os import path
 import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import acf, pacf
@@ -49,37 +50,54 @@ W = fullW[65:1003]
 # plt.clf()
 
 
-nlags=200
-acf_val, confit_val, qstat_val, pvalues = acf(W, unbiased=True, nlags=nlags-1, qstat=True, alpha=.05)
-lags=np.arange(1, nlags+1, 1)
+# nlags=200
+# acf_val, confit_val, qstat_val, pvalues = acf(W, unbiased=True, nlags=nlags-1, qstat=True, alpha=.05)
+# lags=np.arange(1, nlags+1, 1)
 
 
-# Draw acf plot
-fig, ax = plt.subplots(figsize=(4, 3.8))
-ax.fill_between(lags[1:], confit_val[1:, 0], confit_val[1:, 1], where=confit_val[1:, 1] >= confit_val[1:, 0], facecolor='gainsboro', interpolate=True)
-#ax.scatter(lags[1:], acf_val[1:], marker='+', color='crimson')
-ax.bar(lags[1:], acf_val[1:], color='crimson')
-plt.grid()
-#plt.ylabel(r'$r_{\tau}$')
-plt.xlabel(r'$\tau$')
-ax.xaxis.grid(b=True, which='both')
-ax.yaxis.grid(b=True, which='both')
-plt.title(r'$r_{\tau}$')
-#ax.legend(loc='best', frameon=True)
-plt.draw()
-fig.savefig(path.join(outpath, "acf200.png"))
-plt.clf()
+# # Draw acf plot
+# fig, ax = plt.subplots(figsize=(4, 3.8))
+# ax.fill_between(lags[1:], confit_val[1:, 0], confit_val[1:, 1], where=confit_val[1:, 1] >= confit_val[1:, 0], facecolor='gainsboro', interpolate=True)
+# #ax.scatter(lags[1:], acf_val[1:], marker='+', color='crimson')
+# ax.bar(lags[1:], acf_val[1:], color='crimson')
+# plt.grid()
+# #plt.ylabel(r'$r_{\tau}$')
+# plt.xlabel(r'$\tau$')
+# ax.xaxis.grid(b=True, which='both')
+# ax.yaxis.grid(b=True, which='both')
+# plt.title(r'$r_{\tau}$')
+# #ax.legend(loc='best', frameon=True)
+# plt.draw()
+# fig.savefig(path.join(outpath, "acf200.png"))
+# plt.clf()
+
+# # Draw QLB p-values plot
+# fig, ax = plt.subplots(figsize=(4, 3.8))
+# ax.bar(lags[1:-1], pvalues[1:], color='crimson')
+# plt.grid()
+# # plt.ylabel(r'Ljung–Box Q test p-values')
+# plt.xlabel(r'$n$')
+# ax.xaxis.grid(b=True, which='both')
+# ax.yaxis.grid(b=True, which='both')
+# plt.title(r'Ljung–Box Q test p-values')
+# #ax.legend(loc='best', frameon=True)
+# plt.draw()
+# fig.savefig(path.join(outpath, "qlb200.png"))
+# plt.clf()
+
+f, Pxx_den = signal.periodogram(W - np.average(W), window='hamming')
 
 # Draw QLB p-values plot
-fig, ax = plt.subplots(figsize=(4, 3.8))
-ax.bar(lags[1:-1], pvalues[1:], color='crimson')
+fig, ax = plt.subplots(figsize=(8, 3.8))
+# ax.bar(lags[1:-1], pvalues[1:], color='crimson')
+ax.semilogy(f, Pxx_den, color='crimson')
 plt.grid()
-# plt.ylabel(r'Ljung–Box Q test p-values')
-plt.xlabel(r'$n$')
+plt.ylabel(r'$\frac{1}{T} {|X_{T} (i \omega)|}^2 $')
+plt.xlabel(r'$\omega$')
 ax.xaxis.grid(b=True, which='both')
 ax.yaxis.grid(b=True, which='both')
-plt.title(r'Ljung–Box Q test p-values')
+# plt.title(r'Ljung–Box Q test p-values')
 #ax.legend(loc='best', frameon=True)
 plt.draw()
-fig.savefig(path.join(outpath, "qlb200.png"))
+fig.savefig(path.join(outpath, "psd.png"))
 plt.clf()
