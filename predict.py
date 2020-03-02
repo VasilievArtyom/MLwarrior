@@ -1,13 +1,12 @@
 import math
 import numpy as np
 from numpy import *
-from scipy.optimize import curve_fit
-from scipy import signal
 from os import path
 import matplotlib.pyplot as plt
-from statsmodels.tsa.stattools import acf, pacf
 from statsmodels.tsa.arima_model import ARIMA
-
+import statsmodels.api as sm
+import itertools
+import warnings
 
 
 plt.rc('text', usetex=True)
@@ -23,10 +22,29 @@ fulln, fullW= np.loadtxt(path.join(inpath, currentfile), usecols=(0, 1), unpack=
 n = fulln[65:1003]
 W = fullW[65:1003]
 
-# fit model
-model = ARIMA(W, order=(7,0,1))
-model_fit = model.fit(disp=0)
 
+
+# fit model
+p = d = q = range(0, 15)
+pdq = list(itertools.product(p, d, q))
+warnings.filterwarnings("ignore")
+f = open('hyperparam.txt','w') 
+for param in pdq:
+	try:
+		model = sm.tsa.statespace.SARIMAX(W,
+										  order=param,
+										  seasonal_order=(0,0,0, 12),
+										  enforce_stationarity=False,
+										  enforce_invertibility=False)
+		results = model.fit()
+		print('ARIMA{} - AIC:{}'.format(param, results.aic), file=f)
+	except:
+		continue
+
+# model = ARIMA(W, order=(p,d,q))
+# model_fit = model.fit(disp=0)
+# print(model_fit.summary())
+# print(model_fit.conf_int(), shape(model_fit.conf_int()))
 
 
 # f, Pxx_den = signal.periodogram(W - np.average(W), window='hamming')
