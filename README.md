@@ -1,3 +1,3 @@
 # MLwarrior
-top secret public repository
-see report.pdf file for details
+Top secret public repository.
+See report.pdf file for details.
